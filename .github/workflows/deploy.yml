@@ -18,4 +18,4 @@ jobs:
           args: deploy --dir=. --prod
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: 58cf951a-f033-46dd-88ce-345a142de74a
+          NETLIFY_SITE_ID: 0e0166ae-ac2c-4126-92e0-2481e96b8248
