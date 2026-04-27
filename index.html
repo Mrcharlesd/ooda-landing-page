@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OODA Loop — Decision-Making Checklist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    :root {
+      --bg:      #080b10;
+      --surface: #0e1420;
+      --line:    rgba(255,255,255,0.06);
+      --amber:   #F59E0B;
+      --amber-d: #B45309;
+      --cream:   #F8F5EE;
+      --mid:     #6B7280;
+      --dim:     #374151;
+    }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--cream);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── Noise texture overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 20px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(12px);
+      background: rgba(8,11,16,0.7);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--cream);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--amber); }
+    .nav-cta {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--amber);
+      text-decoration: none;
+      border: 1px solid rgba(245,158,11,0.35);
+      padding: 9px 20px;
+      transition: all 0.2s;
+    }
+    .nav-cta:hover {
+      background: var(--amber);
+      color: var(--bg);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 120px 0 80px;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-left {
+      padding: 0 48px 0 72px;
+    }
+    .hero-right {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding-right: 72px;
+    }
+    .eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .eyebrow::before {
+      content: '';
+      width: 24px;
+      height: 1px;
+      background: var(--amber);
+      flex-shrink: 0;
+    }
+    h1 {
+      font-size: clamp(40px, 5.5vw, 80px);
+      font-weight: 700;
+      line-height: 1.0;
+      letter-spacing: -0.025em;
+      color: var(--cream);
+      margin-bottom: 24px;
+    }
+    h1 em {
+      font-style: normal;
+      color: var(--amber);
+    }
+    .hero-desc {
+      font-size: 17px;
+      font-weight: 300;
+      color: var(--mid);
+      line-height: 1.8;
+      max-width: 440px;
+      margin-bottom: 48px;
+    }
+    .hero-desc strong {
+      color: var(--cream);
+      font-weight: 500;
+    }
+
+    /* ── OPT-IN FORM ── */
+    .optin-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 400px;
+    }
+    .input-row {
+      display: flex;
+      gap: 0;
+    }
+    .optin-form input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--dim);
+      border-right: none;
+      color: var(--cream);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      padding: 14px 18px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .optin-form input::placeholder { color: var(--mid); }
+    .optin-form input:focus { border-color: rgba(245,158,11,0.5); }
+    .btn-submit {
+      background: var(--amber);
+      color: var(--bg);
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 14px 22px;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .btn-submit:hover { background: #FBBF24; }
+    .form-note {
+      font-size: 11px;
+      color: var(--mid);
+      letter-spacing: 0.03em;
+    }
+
+    /* ── OODA DIAGRAM ── */
+    .ooda-diagram {
+      position: relative;
+      width: 380px;
+      height: 380px;
+    }
+    .ooda-svg {
+      width: 100%;
+      height: 100%;
+    }
+    /* Pulsing ring */
+    .pulse-ring {
+      animation: pulse-ring 3s ease-out infinite;
+      transform-origin: center;
+    }
+    @keyframes pulse-ring {
+      0%   { opacity: 0.4; transform: scale(1); }
+      50%  { opacity: 0.1; transform: scale(1.08); }
+      100% { opacity: 0.4; transform: scale(1); }
+    }
+    /* Node labels */
+    .ooda-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      fill: var(--cream);
+    }
+    .ooda-letter {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      fill: var(--amber);
+    }
+    /* Rotating orbit arrow */
+    .orbit-arrow {
+      animation: orbit 8s linear infinite;
+      transform-origin: 190px 190px;
+    }
+    @keyframes orbit {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    /* Active node pulse */
+    .node-active {
+      animation: node-glow 2s ease-in-out infinite;
+    }
+    @keyframes node-glow {
+      0%, 100% { opacity: 0.6; }
+      50%       { opacity: 1; }
+    }
+
+    /* ── DIVIDER ── */
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--line);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── PHASE SECTION ── */
+    .phases {
+      position: relative;
+      z-index: 1;
+      padding: 80px 72px;
+    }
+    .phases-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 64px;
+    }
+    .phases-title {
+      font-size: clamp(28px, 3vw, 44px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    .phases-subtitle {
+      font-size: 13px;
+      color: var(--mid);
+      max-width: 280px;
+      text-align: right;
+      line-height: 1.7;
+    }
+    .phases-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border: 1px solid var(--line);
+    }
+    .phase-card {
+      padding: 40px 32px;
+      border-right: 1px solid var(--line);
+      position: relative;
+      transition: background 0.3s;
+    }
+    .phase-card:last-child { border-right: none; }
+    .phase-card:hover { background: var(--surface); }
+    .phase-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--dim);
+      letter-spacing: 0.2em;
+      margin-bottom: 20px;
+    }
+    .phase-letter {
+      font-size: 64px;
+      font-weight: 700;
+      color: var(--amber);
+      line-height: 1;
+      margin-bottom: 4px;
+      opacity: 0.9;
+    }
+    .phase-word {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-bottom: 24px;
+    }
+    .phase-desc {
+      font-size: 14px;
+      color: var(--mid);
+      line-height: 1.75;
+      margin-bottom: 28px;
+    }
+    .phase-checks {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .phase-checks li {
+      font-size: 13px;
+      color: var(--cream);
+      font-weight: 300;
+      padding-left: 18px;
+      position: relative;
+      line-height: 1.5;
+    }
+    .phase-checks li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      width: 6px;
+      height: 6px;
+      border: 1px solid var(--amber);
+      transform: rotate(45deg);
+    }
+
+    /* ── QUOTE SECTION ── */
+    .quote-section {
+      position: relative;
+      z-index: 1;
+      padding: 80px 72px;
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 80px;
+      align-items: center;
+    }
+    .quote-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 16px;
+    }
+    .quote-origin {
+      font-size: 14px;
+      color: var(--mid);
+      line-height: 1.8;
+    }
+    blockquote {
+      font-size: clamp(20px, 2.2vw, 30px);
+      font-weight: 300;
+      line-height: 1.55;
+      color: var(--cream);
+      letter-spacing: -0.01em;
+      position: relative;
+      padding-left: 32px;
+    }
+    blockquote::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 4px;
+      bottom: 4px;
+      width: 2px;
+      background: var(--amber);
+    }
+    blockquote strong { color: var(--amber); font-weight: 700; }
+
+    /* ── CHECKLIST PREVIEW ── */
+    .preview-section {
+      position: relative;
+      z-index: 1;
+      padding: 80px 72px;
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .preview-left {}
+    .section-eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-eyebrow::before {
+      content: '';
+      width: 20px;
+      height: 1px;
+      background: var(--amber);
+    }
+    .preview-left h2 {
+      font-size: clamp(26px, 3vw, 42px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+    .preview-left p {
+      font-size: 15px;
+      color: var(--mid);
+      line-height: 1.8;
+      margin-bottom: 36px;
+    }
+    .preview-items {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .preview-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 16px 20px;
+      border: 1px solid var(--line);
+      transition: border-color 0.2s;
+    }
+    .preview-item:hover { border-color: rgba(245,158,11,0.25); }
+    .item-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--amber);
+      background: rgba(245,158,11,0.08);
+      padding: 4px 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .item-text {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--cream);
+      line-height: 1.6;
+    }
+
+    /* ── CTA SECTION ── */
+    .cta-section {
+      position: relative;
+      z-index: 1;
+      padding: 100px 72px;
+      border-top: 1px solid var(--line);
+      text-align: center;
+    }
+    .cta-kicker {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 28px;
+    }
+    .cta-section h2 {
+      font-size: clamp(32px, 5vw, 68px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      margin-bottom: 20px;
+    }
+    .cta-section p {
+      font-size: 16px;
+      font-weight: 300;
+      color: var(--mid);
+      max-width: 480px;
+      margin: 0 auto 48px;
+      line-height: 1.8;
+    }
+    .cta-form {
+      display: flex;
+      gap: 0;
+      max-width: 440px;
+      margin: 0 auto 16px;
+    }
+    .cta-form input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--dim);
+      border-right: none;
+      color: var(--cream);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      padding: 16px 20px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .cta-form input::placeholder { color: var(--mid); }
+    .cta-form input:focus { border-color: rgba(245,158,11,0.5); }
+    .cta-note {
+      font-size: 11px;
+      color: var(--dim);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--line);
+      padding: 32px 72px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-brand {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--mid);
+    }
+    .footer-brand span { color: var(--amber); }
+    .footer-copy {
+      font-size: 11px;
+      color: var(--dim);
+    }
+
+    /* ── ANIMATIONS ── */
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    [data-reveal].visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 960px) {
+      nav { padding: 16px 24px; }
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 100px 24px 60px;
+        gap: 60px;
+      }
+      .hero-left { padding: 0; }
+      .hero-right { padding: 0; justify-content: flex-start; }
+      .ooda-diagram { width: 280px; height: 280px; }
+      .phases { padding: 60px 24px; }
+      .phases-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .phases-subtitle { text-align: left; }
+      .phases-grid { grid-template-columns: 1fr 1fr; }
+      .phase-card:nth-child(2) { border-right: none; }
+      .phase-card:nth-child(3) { border-top: 1px solid var(--line); }
+      .phase-card:nth-child(4) { border-top: 1px solid var(--line); }
+      .quote-section { padding: 60px 24px; grid-template-columns: 1fr; gap: 32px; }
+      .preview-section { padding: 60px 24px; grid-template-columns: 1fr; gap: 40px; }
+      .cta-section { padding: 80px 24px; }
+      .cta-form { flex-direction: column; max-width: 320px; }
+      .cta-form input { border-right: 1px solid var(--dim); }
+      .btn-submit { width: 100%; }
+      footer { padding: 24px; flex-direction: column; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo"><span>BRG</span> · Battle Rhythm Group</a>
+    <a href="#get" class="nav-cta">Get the Checklist</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <p class="eyebrow">Decision-Making Framework</p>
+      <h1>Think Faster.<br>Decide <em>Smarter.</em><br>Move First.</h1>
+      <p class="hero-desc">
+        The <strong>OODA Loop</strong> is the framework elite military pilots, executives, and crisis leaders use to outthink the competition — even in chaos. Your checklist puts it in your hands.
+      </p>
+      <form class="optin-form" onsubmit="handleSubmit(event)">
+        <div class="input-row">
+          <input type="email" placeholder="Your email address" required />
+          <button type="submit" class="btn-submit">Get It Free</button>
+        </div>
+        <p class="form-note">No spam. Instant access. Unsubscribe anytime.</p>
+      </form>
+    </div>
+    <div class="hero-right">
+      <div class="ooda-diagram">
+        <svg class="ooda-svg" viewBox="0 0 380 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Outer pulse ring -->
+          <circle class="pulse-ring" cx="190" cy="190" r="175" stroke="rgba(245,158,11,0.15)" stroke-width="1"/>
+          <!-- Main circle track -->
+          <circle cx="190" cy="190" r="155" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+          <!-- Dotted orbit -->
+          <circle cx="190" cy="190" r="155" stroke="rgba(245,158,11,0.12)" stroke-width="1" stroke-dasharray="4 8"/>
+
+          <!-- Connection lines -->
+          <line x1="190" y1="35" x2="345" y2="190" stroke="rgba(245,158,11,0.1)" stroke-width="1"/>
+          <line x1="345" y1="190" x2="190" y2="345" stroke="rgba(245,158,11,0.1)" stroke-width="1"/>
+          <line x1="190" y1="345" x2="35" y2="190" stroke="rgba(245,158,11,0.1)" stroke-width="1"/>
+          <line x1="35" y1="190" x2="190" y2="35" stroke="rgba(245,158,11,0.1)" stroke-width="1"/>
+
+          <!-- Center hub -->
+          <circle cx="190" cy="190" r="28" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.2)" stroke-width="1"/>
+          <text x="190" y="196" text-anchor="middle" font-family="Space Mono, monospace" font-size="10" font-weight="700" fill="rgba(245,158,11,0.6)" letter-spacing="1">LOOP</text>
+
+          <!-- Orbit marker (moving dot) -->
+          <g class="orbit-arrow">
+            <circle cx="190" cy="35" r="5" fill="var(--amber)"/>
+            <circle cx="190" cy="35" r="10" fill="rgba(245,158,11,0.2)"/>
+          </g>
+
+          <!-- NODE: OBSERVE (top) -->
+          <g class="node-active">
+            <circle cx="190" cy="35" r="36" fill="#080b10" stroke="var(--amber)" stroke-width="1.5"/>
+          </g>
+          <text x="190" y="30" text-anchor="middle" class="ooda-letter" font-family="Space Grotesk, sans-serif" font-size="20" font-weight="700" fill="#F59E0B">O</text>
+          <text x="190" y="46" text-anchor="middle" font-family="Space Mono, monospace" font-size="7" font-weight="700" letter-spacing="2" fill="#6B7280" text-transform="uppercase">OBSERVE</text>
+
+          <!-- NODE: ORIENT (right) -->
+          <circle cx="345" cy="190" r="36" fill="#080b10" stroke="rgba(245,158,11,0.45)" stroke-width="1"/>
+          <text x="345" y="185" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="20" font-weight="700" fill="#F59E0B">O</text>
+          <text x="345" y="201" text-anchor="middle" font-family="Space Mono, monospace" font-size="7" font-weight="700" letter-spacing="2" fill="#6B7280">ORIENT</text>
+
+          <!-- NODE: DECIDE (bottom) -->
+          <circle cx="190" cy="345" r="36" fill="#080b10" stroke="rgba(245,158,11,0.45)" stroke-width="1"/>
+          <text x="190" y="340" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="20" font-weight="700" fill="#F59E0B">D</text>
+          <text x="190" y="356" text-anchor="middle" font-family="Space Mono, monospace" font-size="7" font-weight="700" letter-spacing="2" fill="#6B7280">DECIDE</text>
+
+          <!-- NODE: ACT (left) -->
+          <circle cx="35" cy="190" r="36" fill="#080b10" stroke="rgba(245,158,11,0.45)" stroke-width="1"/>
+          <text x="35" y="185" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="20" font-weight="700" fill="#F59E0B">A</text>
+          <text x="35" y="201" text-anchor="middle" font-family="Space Mono, monospace" font-size="7" font-weight="700" letter-spacing="2" fill="#6B7280">ACT</text>
+
+          <!-- Curved arrows between nodes -->
+          <!-- O → O (top to right) -->
+          <path d="M 220 52 Q 300 80 328 162" stroke="rgba(245,158,11,0.35)" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <!-- O → D (right to bottom) -->
+          <path d="M 328 218 Q 300 300 220 328" stroke="rgba(245,158,11,0.35)" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <!-- D → A (bottom to left) -->
+          <path d="M 160 328 Q 80 300 52 218" stroke="rgba(245,158,11,0.35)" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+          <!-- A → O (left to top) -->
+          <path d="M 52 162 Q 80 80 160 52" stroke="rgba(245,158,11,0.35)" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+
+          <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+              <path d="M 0 0 L 8 4 L 0 8 L 2 4 Z" fill="rgba(245,158,11,0.7)"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHASES -->
+  <section class="phases">
+    <div class="phases-header" data-reveal>
+      <h2 class="phases-title">Four phases.<br>One lethal loop.</h2>
+      <p class="phases-subtitle">Each phase has a targeted set of questions designed to sharpen your thinking under pressure.</p>
+    </div>
+    <div class="phases-grid" data-reveal>
+      <div class="phase-card">
+        <p class="phase-num">01 ——</p>
+        <p class="phase-letter">O</p>
+        <p class="phase-word">Observe</p>
+        <p class="phase-desc">Gather raw, unfiltered information from your environment without bias or assumption.</p>
+        <ul class="phase-checks">
+          <li>What is actually happening right now?</li>
+          <li>What data do I have — and what's missing?</li>
+          <li>What am I ignoring or filtering out?</li>
+          <li>What changed since last time?</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <p class="phase-num">02 ——</p>
+        <p class="phase-letter">O</p>
+        <p class="phase-word">Orient</p>
+        <p class="phase-desc">Analyze and synthesize what you observed through your mental models and experience.</p>
+        <ul class="phase-checks">
+          <li>What does this information mean?</li>
+          <li>What biases might be distorting my view?</li>
+          <li>What's the most likely scenario?</li>
+          <li>What are my options from here?</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <p class="phase-num">03 ——</p>
+        <p class="phase-letter">D</p>
+        <p class="phase-word">Decide</p>
+        <p class="phase-desc">Choose the best course of action based on your orientation — commit and communicate it.</p>
+        <ul class="phase-checks">
+          <li>Which option best fits the situation?</li>
+          <li>What's the cost of waiting?</li>
+          <li>Who needs to know my decision?</li>
+          <li>What does success look like?</li>
+        </ul>
+      </div>
+      <div class="phase-card">
+        <p class="phase-num">04 ——</p>
+        <p class="phase-letter">A</p>
+        <p class="phase-word">Act</p>
+        <p class="phase-desc">Execute the decision with speed and precision — then immediately begin observing again.</p>
+        <ul class="phase-checks">
+          <li>Did I execute the plan as intended?</li>
+          <li>What new information is now available?</li>
+          <li>What's the effect of my action?</li>
+          <li>Do I need to loop again — faster?</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUOTE -->
+  <section class="quote-section" data-reveal>
+    <div>
+      <p class="quote-label">Origins</p>
+      <p class="quote-origin">Col. John Boyd<br>USAF Fighter Pilot<br>&amp; Military Strategist<br>1927 – 1997</p>
+    </div>
+    <blockquote>
+      "He who can handle the quickest rate of change <strong>survives.</strong> The goal is to get inside the enemy's decision cycle — to think, decide, and act <strong>faster than they can respond.</strong>"
+    </blockquote>
+  </section>
+
+  <!-- CHECKLIST PREVIEW -->
+  <section class="preview-section" data-reveal>
+    <div class="preview-left">
+      <p class="section-eyebrow">Inside the Checklist</p>
+      <h2>Every question you need. No noise.</h2>
+      <p>The OODA Loop Decision-Making Checklist distills Boyd's framework into a battle-tested set of prompts you can run in 90 seconds — in any situation.</p>
+      <a href="#get" class="nav-cta" style="display:inline-block; text-decoration:none;">Download Free →</a>
+    </div>
+    <div class="preview-items">
+      <div class="preview-item">
+        <span class="item-tag">Observe</span>
+        <p class="item-text">What raw signals am I receiving right now — and which ones conflict with each other?</p>
+      </div>
+      <div class="preview-item">
+        <span class="item-tag">Observe</span>
+        <p class="item-text">Am I watching what's actually happening, or what I expect to happen?</p>
+      </div>
+      <div class="preview-item">
+        <span class="item-tag">Orient</span>
+        <p class="item-text">What past experience or mental model is shaping how I'm reading this situation?</p>
+      </div>
+      <div class="preview-item">
+        <span class="item-tag">Orient</span>
+        <p class="item-text">If I'm wrong about my orientation, what's the worst case?</p>
+      </div>
+      <div class="preview-item">
+        <span class="item-tag">Decide</span>
+        <p class="item-text">Is my decision reversible? If not, what's the minimum information I need before committing?</p>
+      </div>
+      <div class="preview-item">
+        <span class="item-tag">Act</span>
+        <p class="item-text">How will I know within the next 10 minutes whether this is working?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="cta-section" id="get" data-reveal>
+    <p class="cta-kicker">Free Download</p>
+    <h2>Your next decision<br>starts <em style="color:var(--amber);font-style:normal;">here.</em></h2>
+    <p>Get the OODA Loop Decision-Making Checklist — a single-page framework you can use in any high-stakes moment, for free.</p>
+    <form class="cta-form" onsubmit="handleSubmit(event)">
+      <input type="email" placeholder="Enter your email" required />
+      <button type="submit" class="btn-submit">Send It →</button>
+    </form>
+    <p class="cta-note">No spam. You can unsubscribe at any time.</p>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p class="footer-brand"><span>BRG</span> · Battle Rhythm Group</p>
+    <p class="footer-copy">&copy; 2026 Battle Rhythm Group. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const reveals = document.querySelectorAll('[data-reveal]');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    reveals.forEach(el => observer.observe(el));
+
+    // Form handler (replace with real integration)
+    function handleSubmit(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      const input = e.target.querySelector('input');
+      btn.textContent = 'Sent!';
+      btn.style.background = '#10B981';
+      input.value = '';
+      setTimeout(() => {
+        btn.textContent = btn.textContent.includes('Send') ? 'Send It →' : 'Get It Free';
+        btn.style.background = '';
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
