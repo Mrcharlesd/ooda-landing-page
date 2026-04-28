@@ -56,15 +56,16 @@
       border-bottom: 1px solid var(--line);
     }
     .nav-logo {
-      font-family: 'Space Mono', monospace;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--cream);
+      display: flex;
+      align-items: center;
       text-decoration: none;
     }
-    .nav-logo span { color: var(--amber); }
+    .nav-logo img {
+      height: 44px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+    }
     .nav-cta {
       font-size: 12px;
       font-weight: 700;
@@ -589,7 +590,9 @@
 
   <!-- NAV -->
   <nav>
-    <a href="#" class="nav-logo"><span>BRG</span> · Battle Rhythm Group</a>
+    <a href="#" class="nav-logo">
+      <img src="brg-logo.jpg" alt="Battle Rhythm Group" />
+    </a>
     <a href="#get" class="nav-cta">Get the Checklist</a>
   </nav>
 
@@ -796,7 +799,7 @@
 
   <!-- FOOTER -->
   <footer>
-    <p class="footer-brand"><span>BRG</span> · Battle Rhythm Group</p>
+    <img src="brg-logo.jpg" alt="Battle Rhythm Group" style="height:36px;width:auto;object-fit:contain;" />
     <p class="footer-copy">&copy; 2026 Battle Rhythm Group. All rights reserved.</p>
   </footer>
 
